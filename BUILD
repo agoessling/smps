@@ -69,3 +69,12 @@ py_binary(
     ],
     visibility = ["//visibility:public"],
 )
+
+py_binary(
+    name = "header_matcher",
+    srcs = ["header_matcher.py"],
+    deps = [
+        requirement('pyside6'),
+    ],
+    visibility = ["//visibility:public"],
+)
