@@ -1,3 +1,4 @@
+import csv
 import sys
 from typing import Callable, Optional, Sequence
 
@@ -36,18 +37,15 @@ class MatcherWindow(qw.QWidget):
     self.result_table.setSelectionBehavior(qw.QTableWidget.SelectRows)
     self.table_layout.addWidget(self.result_table)
 
-    self.prev_button = qw.QPushButton()
-    self.prev_button.setIcon(self.style().standardIcon(qw.QStyle.SP_ArrowUp))
-    self.prev_button.clicked.connect(lambda x: self.update_header_row(-1))
-    self.next_button = qw.QPushButton()
-    self.next_button.setIcon(self.style().standardIcon(qw.QStyle.SP_ArrowDown))
-    self.next_button.clicked.connect(lambda x: self.update_header_row(1))
+    self.header_spinbox = qw.QSpinBox()
+    self.header_spinbox.setMinimum(0)
+    self.header_spinbox.setRange(0, 99)
+    self.header_spinbox.valueChanged.connect(self.update_header_row)
     self.match_button = qw.QPushButton('Match')
     self.match_button.clicked.connect(self.match_clicked)
 
     self.button_layout.addWidget(qw.QLabel('Header Row:'))
-    self.button_layout.addWidget(self.prev_button)
-    self.button_layout.addWidget(self.next_button)
+    self.button_layout.addWidget(self.header_spinbox)
     self.button_layout.addStretch()
     self.button_layout.addWidget(self.match_button)
 
@@ -61,9 +59,9 @@ class MatcherWindow(qw.QWidget):
   def add_update_header_row_callback(self, func: Callable[[int], None]):
     self.update_header_row_callback = func
 
-  def update_header_row(self, increment: int):
+  def update_header_row(self, row: int):
     if self.update_header_row_callback:
-      self.update_header_row_callback(increment)
+      self.update_header_row_callback(row)
 
   def selection_made(self, item: qw.QTableWidgetItem):
     result_item = self.result_table.selectedItems()[1]
@@ -97,6 +95,14 @@ class MatcherWindow(qw.QWidget):
       self.result_table.setItem(i, 1, item)
 
     self.result_table.setCurrentItem(self.result_table.item(0, 0))
+
+
+def get_header_row(path: str, row: int):
+  with open(path, 'r', newline='') as f:
+    reader = csv.reader(f)
+    for i, header in enumerate(reader):
+      if row == i:
+        return header
 
 
 def main():
